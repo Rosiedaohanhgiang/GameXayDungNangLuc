@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xây Dựng Năng Lực Tự Thân (Bandura)</title>
+    
+    <!-- Tải Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Import Google Font 'Oswald' -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Áp dụng font Oswald làm font chữ chính */
+        body {
+            font-family: 'Oswald', sans-serif;
+            background-color: #f4f7f6;
+        }
+        
+        /* Định nghĩa 4 màu chủ đạo cho 4 nguồn lực */
+        :root {
+            --color-1-mastery: #009688;     /* Xanh Lá (Thành thạo) */
+            --color-2-vicarious: #5C6BC0;  /* Xanh Vừa (Gián tiếp) */
+            --color-3-verbal: #FF9800;     /* Cam (Lời nói) */
+            --color-4-emotional: #E91E63;  /* Hồng Đậm (Cảm xúc) */
+            
+            --color-primary-dark: #1a237e; /* Xanh Tối (Header/Footer) */
+        }
+
+        /* Styles cho các Tab Case Study */
+        .case-tab {
+            @apply px-6 py-3 text-lg font-semibold text-gray-500 border-b-4 border-transparent transition-all duration-300 ease-in-out;
+        }
+        .case-tab.active {
+            @apply text-[var(--color-primary-dark)] border-[var(--color-primary-dark)];
+        }
+        .case-tab:hover:not(.active) {
+            @apply text-[var(--color-primary-dark)] border-[var(--color-primary-dark)]/50;
+        }
+
+        /* Styles cho Thẻ Kéo (Draggable Card) */
+        .draggable-card {
+            @apply p-4 mb-4 bg-white border border-gray-300 rounded-lg shadow-md cursor-grab transition-all duration-200 ease-in-out;
+            opacity: 1;
+            transform: scale(1);
+        }
+        .draggable-card:hover {
+            @apply shadow-lg scale-[1.03];
+        }
+        .draggable-card.dragging {
+            @apply opacity-50 bg-gray-200 shadow-xl scale-105 cursor-grabbing;
+        }
+        
+        /* Styles cho Vùng Thả (Drop Zone) */
+        .drop-zone {
+            @apply min-h-[200px] p-4 bg-white border-2 border-dashed border-gray-400 rounded-2xl transition-all duration-300 flex flex-col items-center justify-center text-center;
+        }
+        .drop-zone.drag-over {
+            @apply border-solid scale-105 shadow-inner;
+        }
+        
+        /* Styles cho trạng thái thả đúng */
+        .card-correct {
+            @apply opacity-80 cursor-not-allowed shadow-inner bg-gray-100;
+        }
+
+        /* Animation Lắc (Shake) khi thả sai */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
+            20%, 40%, 60%, 80% { transform: translateX(8px); }
+        }
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        /* Styles cho Modal Phản Hồi */
+        #feedback-modal {
+            @apply fixed inset-0 z-50 flex items-center justify-center p-4 transition-opacity duration-300;
+        }
+        #feedback-modal.hidden {
+            @apply opacity-0 pointer-events-none;
+        }
+        #modal-overlay {
+            @apply absolute inset-0 bg-black/60;
+        }
+        #modal-content {
+            @apply relative z-10 w-full max-w-2xl bg-white p-8 rounded-2xl shadow-xl transform transition-transform duration-300;
+        }
+        #feedback-modal.hidden #modal-content {
+            @apply scale-95;
+        }
+        #feedback-modal:not(.hidden) #modal-content {
+            @apply scale-100;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <!-- HEADER -->
+    <header class="text-white shadow-2xl" style="background-color: var(--color-primary-dark);">
+        <div class="max-w-7xl mx-auto px-6 py-8 text-center">
+            <h1 class="text-5xl md:text-6xl font-bold uppercase tracking-wide">Xây Dựng Năng Lực Tự Thân</h1>
+            <p class="text-2xl mt-2 font-light text-gray-300">4 Nguồn Lực Vượt Qua Kháng Cự Của Albert Bandura</p>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-4 md:p-8 mt-[-40px] z-10 relative">
+
+        <!-- LỜI DẪN NHẬP (TỪ VAI TRÒ COPYWRITER) -->
+        <section class="mb-12 bg-white p-8 rounded-2xl shadow-xl">
+            <h2 class="text-3xl font-semibold mb-4 text-center" style="color: var(--color-primary-dark);">TẠI SAO HỌ KHÁNG CỰ?</h2>
+            <p class="text-lg text-gray-700 max-w-4xl mx-auto text-center leading-relaxed">
+                Sự kháng cự thay đổi thường không bắt nguồn từ logic, mà từ NỖI SỢ HÃI: "Tôi không nghĩ mình làm được".
+                Thuyết phục bằng lý lẽ (Logos) là không đủ. Lãnh đạo phải "kiến tạo" niềm tin (Self-Efficacy) cho nhân viên.
+                Đây là 4 công cụ thực chiến của bạn, dựa trên lý thuyết của Albert Bandura.
+            </p>
+        </section>
+
+        <!-- KHU VỰC TƯƠNG TÁC CHÍNH -->
+        <section class="bg-white p-4 md:p-8 rounded-2xl shadow-2xl">
+
+            <!-- 1. BỘ CHỌN CASE STUDY -->
+            <div id="case-selector" class="flex flex-col sm:flex-row justify-center border-b-2 border-gray-200 mb-8">
+                <button data-case="1" class="case-tab active">Case 1: Triển Khai Hệ Thống Mới</button>
+                <button data-case="2" class="case-tab">Case 2: Bổ Nhiệm Quản Lý Mới</button>
+                <button data-case="3" class="case-tab">Case 3: "Vực Dậy" Sau Thất Bại</button>
+            </div>
+
+            <!-- 2. NỘI DUNG CASE STUDY (Sẽ được JS render) -->
+            <div id="case-content" class="mb-8">
+                <!-- Case Study Title -->
+                <h3 id="case-title" class="text-3xl font-bold text-center mb-2" style="color: var(--color-primary-dark);"></h3>
+                <!-- Case Study Context -->
+                <p id="case-context" class="text-xl text-center text-gray-600 mb-8 max-w-3xl mx-auto"></p>
+            </div>
+
+            <!-- 3. KHU VỰC KÉO THẢ -->
+            <div class="flex flex-col lg:flex-row gap-8">
+                
+                <!-- CỘT BÊN TRÁI: CÁC THẺ BÀI (DRAGGABLE) -->
+                <div class="w-full lg:w-1/3 p-4 bg-gray-50 rounded-xl shadow-inner">
+                    <h4 class="text-xl font-semibold text-center mb-4 text-gray-700">CAN THIỆP CỦA LÃNH ĐẠO (Kéo thả)</h4>
+                    <div id="source-cards-container">
+                        <!-- Thẻ bài sẽ được JS render vào đây -->
+                    </div>
+                </div>
+
+                <!-- CỘT BÊN PHẢI: 4 NGUỒN LỰC (DROP ZONES) -->
+                <div class="w-full lg:w-2/3 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    
+                    <!-- 1. Mastery Experiences -->
+                    <div id="drop-mastery" class="drop-zone border-[var(--color-1-mastery)]" data-zone="mastery">
+                        <span class="w-16 h-16 rounded-full flex items-center justify-center text-white" style="background-color: var(--color-1-mastery);">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </span>
+                        <h5 class="text-xl font-bold mt-2" style="color: var(--color-1-mastery);">1. TRẢI NGHIỆM THÀNH THẠO</h5>
+                    </div>
+                    
+                    <!-- 2. Vicarious Experiences -->
+                    <div id="drop-vicarious" class="drop-zone border-[var(--color-2-vicarious)]" data-zone="vicarious">
+                        <span class="w-16 h-16 rounded-full flex items-center justify-center text-white" style="background-color: var(--color-2-vicarious);">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-2.29A4 4 0 118.644 11H13a3 3 0 013 3v6z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 20v-2.29A4 4 0 017.29 15H8a3 3 0 013 3v2"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h4v.29A4 4 0 015.71 7H5a3 3 0 00-3 3v2"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 3h2.29A4 4 0 0111 5.71V6a3 3 0 01-3 3H7v-2a3 3 0 00-3-3V3z"></path></svg>
+                        </span>
+                        <h5 class="text-xl font-bold mt-2" style="color: var(--color-2-vicarious);">2. TRẢI NGHIỆM GIÁN TIẾP</h5>
+                    </div>
+
+                    <!-- 3. Verbal Persuasion -->
+                    <div id="drop-verbal" class="drop-zone border-[var(--color-3-verbal)]" data-zone="verbal">
+                        <span class="w-16 h-16 rounded-full flex items-center justify-center text-white" style="background-color: var(--color-3-verbal);">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                        </span>
+                        <h5 class="text-xl font-bold mt-2" style="color: var(--color-3-verbal);">3. THUYẾT PHỤC BẰNG LỜI NÓI</h5>
+                    </div>
+
+                    <!-- 4. Emotional States -->
+                    <div id="drop-emotional" class="drop-zone border-[var(--color-4-emotional)]" data-zone="emotional">
+                        <span class="w-16 h-16 rounded-full flex items-center justify-center text-white" style="background-color: var(--color-4-emotional);">
+                           <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </span>
+                        <h5 class="text-xl font-bold mt-2" style="color: var(--color-4-emotional);">4. TRẠNG THÁI CẢM XÚC</h5>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Nút Reset -->
+            <div class="text-center mt-8">
+                <button id="reset-button" class="px-8 py-3 text-lg font-semibold text-white rounded-lg shadow-md transition-transform duration-200 hover:scale-105" style="background-color: var(--color-primary-dark);">
+                    CHƠI LẠI CASE NÀY
+                </button>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="text-center p-8 mt-12 text-gray-300" style="background-color: var(--color-primary-dark);">
+        <p class="text-lg">Rosie Đào Hạnh Giang CEO Build Talents</p>
+    </footer>
+
+    <!-- MODAL PHẢN HỒI (Feedback) -->
+    <div id="feedback-modal" class="hidden">
+        <!-- Lớp phủ mờ -->
+        <div id="modal-overlay" class="cursor-pointer"></div>
+        
+        <!-- Nội dung Modal -->
+        <div id="modal-content">
+            <h3 id="modal-title" class="text-3xl font-bold mb-4"></h3>
+            <div id="modal-body" class="text-lg text-gray-700 leading-relaxed space-y-4">
+                <p><strong>Can thiệp của bạn:</strong></p>
+                <blockquote id="modal-quote" class="p-4 bg-gray-100 border-l-4 rounded-r-lg italic"></blockquote>
+                <p><strong>Phân tích (Tại sao lại như vậy):</strong></p>
+                <p id="modal-explanation"></p>
+            </div>
+            <button id="modal-close" class="mt-8 px-6 py-2 text-lg font-semibold text-white rounded-lg shadow" style="background-color: var(--color-2-vicarious);">
+                Đã hiểu
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA STORE (Nội dung từ vai trò Copywriter) ---
+        // Nơi chứa toàn bộ nội dung học thuật cho 4 nguồn lực
+        const contentData = {
+            "1": { // Case Study 1
+                title: 'Case Study 1: Triển Khai Hệ Thống Mới',
+                context: 'Bạn (HR) cần giúp nhân viên vượt qua sự kháng cự khi phải chuyển từ Excel sang một phần mềm CRM mới phức tạp.',
+                cards: [
+                    {
+                        id: 'c1-mastery',
+                        text: 'Tổ chức một buổi "mini-hackathon" chỉ với 1-2 tính năng cốt lõi, và trao giải cho người nhập liệu 5 khách hàng nhanh nhất.',
+                        correctZone: 'mastery',
+                        feedbackTitle: 'ĐÚNG! ĐÓ LÀ TRẢI NGHIỆM THÀNH THẠO',
+                        feedback: 'Nguồn lực mạnh nhất! Thay vì bắt họ "học bơi" ở biển, bạn cho họ một "chiến thắng nhỏ" (small win) trong hồ bơi trẻ em. Hoàn thành một tác vụ nhỏ thành công sẽ xây dựng niềm tin "Tôi làm được".'
+                    },
+                    {
+                        id: 'c1-vicarious',
+                        text: 'Chọn ra một "champion" ở mỗi phòng (người không rành công nghệ), đào tạo họ trước, và để họ chia sẻ cách họ đã làm được.',
+                        correctZone: 'vicarious',
+                        feedbackTitle: 'CHÍNH XÁC! ĐÓ LÀ TRẢI NGHIỆM GIÁN TIẾP',
+                        feedback: 'Khi nhân viên thấy "một người giống mình" (không rành công nghệ) làm được, niềm tin của họ tăng vọt. Họ nghĩ: "Nếu người đó làm được, mình cũng làm được". Đây là sức mạnh của hình mẫu tương đồng.'
+                    },
+                    {
+                        id: 'c1-verbal',
+                        text: 'Họp 1:1 với trưởng nhóm và nói: "Tôi tin tưởng chị sẽ dẫn dắt team mình làm chủ công cụ này. Kinh nghiệm vận hành của chị là không thể thiếu".',
+                        correctZone: 'verbal',
+                        feedbackTitle: 'TUYỆT VỜI! ĐÓ LÀ THUYẾT PHỤC BẰNG LỜI NÓI',
+                        feedback: 'Lời động viên phải đến từ một người "có uy tín" (credible). Khi một lãnh đạo cấp cao thể hiện sự tin tưởng cụ thể, nó sẽ nâng cao niềm tin của người nhận. Chìa khóa là "Tôi tin chị VÌ...[lý do cụ thể]".'
+                    }
+                ]
+            },
+            "2": { // Case Study 2
+                title: 'Case Study 2: Bổ Nhiệm Quản Lý Mới',
+                context: 'Bạn đang chuẩn bị tâm lý cho một nhân viên xuất sắc vừa được thăng chức lên vị trí quản lý lần đầu tiên (first-time manager).',
+                cards: [
+                    {
+                        id: 'c2-mastery',
+                        text: 'Giao cho họ nhiệm vụ đầu tiên là chủ trì một cuộc họp team nội bộ (rủi ro thấp), thay vì một cuộc họp với khách hàng lớn.',
+                        correctZone: 'mastery',
+                        feedbackTitle: 'ĐÚNG! ĐÓ LÀ TRẢI NGHIỆM THÀNH THẠO',
+                        feedback: 'Đừng ném họ vào thử thách khó nhất ngay. Hãy "dàn xếp" một chiến thắng. Thành công trong việc chủ trì một cuộc họp nhỏ sẽ cho họ sự tự tin (efficacy) cần thiết để đối mặt với các cuộc họp lớn hơn.'
+                    },
+                    {
+                        id: 'c2-vicarious',
+                        text: 'Sắp xếp một buổi cà phê cho họ với một quản lý khác (người cũng từng được bổ nhiệm nội bộ) để chia sẻ "bí kíp".',
+                        correctZone: 'vicarious',
+                        feedbackTitle: 'CHÍNH XÁC! ĐÓ LÀ TRẢI NGHIỆM GIÁN TIẾP',
+                        feedback: 'Người quản lý mới này đang sợ hãi. Cho họ thấy một "tấm gương" (mentor) đã từng ở đúng vị trí của họ và đã thành công sẽ giúp họ hình dung ra con đường của chính mình.'
+                    },
+                    {
+                        id: 'c2-emotional',
+                        text: 'Tạo một kênh chat riêng (Sếp, HR, Manager mới) và nói: "Đây là \'vùng an toàn\'. Không có câu hỏi nào là ngớ ngẩn. Chúng tôi ở đây để hỗ trợ".',
+                        correctZone: 'emotional',
+                        feedbackTitle: 'TUYỆT VỜI! ĐÓ LÀ TRẠNG THÁI CẢM XÚC',
+                        feedback: 'Nỗi sợ (trạng thái cảm xúc tiêu cực) là kẻ thù của năng lực tự thân. Bằng cách chủ động tạo ra "an toàn tâm lý" (psychological safety), bạn giảm bớt lo lắng, cho phép họ tập trung vào nhiệm vụ thay vì sợ hãi bị phán xét.'
+                    }
+                ]
+            },
+            "3": { // Case Study 3
+                title: 'Case Study 3: "Vực Dậy" Sau Thất Bại',
+                context: 'Một nhân viên tiềm năng vừa làm hỏng một dự án quan trọng và đang mất hoàn toàn niềm tin vào bản thân.',
+                cards: [
+                    {
+                        id: 'c3-emotional',
+                        text: 'Trong cuộc họp team, tuyên bố: "Team chúng ta đã dám thử nghiệm và thất bại. Đây là văn hóa \'fail-fast\'. Cảm ơn team đã dũng cảm".',
+                        correctZone: 'emotional',
+                        feedbackTitle: 'ĐÚNG! ĐÓ LÀ TRẠNG THÁI CẢM XÚC',
+                        feedback: 'Hành động này "tái định nghĩa" thất bại. Bạn đang gỡ bỏ sự xấu hổ, sợ hãi (cảm xúc tiêu cực) và thay bằng sự ghi nhận (cảm xúc tích cực). Điều này ngăn chặn năng lực tự thân của họ bị sụp đổ hoàn toàn.'
+                    },
+                    {
+                        id: 'c3-verbal',
+                        text: 'Gặp 1:1 và nói: "Dự án này thất bại, nhưng kỹ năng phân tích của em trong giai đoạn A là xuất sắc. Chúng ta cần kỹ năng đó cho dự án B".',
+                        correctZone: 'verbal',
+                        feedbackTitle: 'CHÍNH XÁC! ĐÓ LÀ THUYẾT PHỤC BẰNG LỜI NÓI',
+                        feedback: 'Đây là kỹ thuật "Tách biệt con người khỏi thất bại". Bạn không nói "Em thất bại", bạn nói "Dự án thất bại". Bạn khẳng định lại năng lực (kỹ năng phân tích) của họ. Sự thuyết phục cụ thể này giúp họ tìm lại niềm tin.'
+                    },
+                    {
+                        id: 'c3-mastery',
+                        text: 'Ngay lập tức, chia nhỏ dự án B và giao cho họ một phần mà bạn 99% chắc chắn họ sẽ thành công để lấy lại "momentum".',
+                        correctZone: 'mastery',
+                        feedbackTitle: 'TUYỆT VỜI! ĐÓ LÀ TRẢI NGHIỆM THÀNH THẠO',
+                        feedback: 'Sau thất bại, cách duy nhất để xây dựng lại niềm tin là có một "chiến thắng" mới, dù là nhỏ nhất. Hành động này là một sự "can thiệp có chủ đích" để tạo ra một trải nghiệm thành thạo, giúp họ lấy lại đà.'
+                    }
+                ]
+            }
+        };
+
+        // --- CORE LOGIC (Vai trò Frontend Developer) ---
+
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // Lấy các DOM elements chính
+            const caseSelector = document.getElementById('case-selector');
+            const caseTitle = document.getElementById('case-title');
+            const caseContext = document.getElementById('case-context');
+            const sourceContainer = document.getElementById('source-cards-container');
+            const dropZones = document.querySelectorAll('.drop-zone');
+            const resetButton = document.getElementById('reset-button');
+            const modal = document.getElementById('feedback-modal');
+            const modalOverlay = document.getElementById('modal-overlay');
+            const modalClose = document.getElementById('modal-close');
+
+            let currentCaseId = '1'; // Bắt đầu ở Case 1
+            let draggedCard = null;
+
+            // --- 1. Chức năng Render Case Study ---
+            function renderCase(caseId) {
+                const data = contentData[caseId];
+                if (!data) return;
+
+                // Cập nhật tiêu đề và bối cảnh
+                caseTitle.textContent = data.title;
+                caseContext.textContent = data.context;
+
+                // Xóa thẻ bài và vùng thả cũ
+                sourceContainer.innerHTML = '';
+                dropZones.forEach(zone => {
+                    // Xóa các card đã thả
+                    const droppedCards = zone.querySelectorAll('.draggable-card');
+                    droppedCards.forEach(card => card.remove());
+                    // Reset giao diện
+                    zone.classList.remove('border-green-500', 'bg-green-50');
+                });
+
+                // Tạo các thẻ bài mới
+                data.cards.forEach(cardData => {
+                    const card = document.createElement('div');
+                    card.className = 'draggable-card';
+                    card.setAttribute('draggable', 'true');
+                    card.dataset.cardId = cardData.id;
+                    card.dataset.correctZone = cardData.correctZone;
+                    card.textContent = cardData.text;
+                    sourceContainer.appendChild(card);
+                    
+                    // Thêm sự kiện Kéo
+                    card.addEventListener('dragstart', handleDragStart);
+                    card.addEventListener('dragend', handleDragEnd);
+                });
+            }
+
+            // --- 2. Chức năng Chuyển Tab (Case Selector) ---
+            caseSelector.addEventListener('click', (e) => {
+                if (e.target.classList.contains('case-tab')) {
+                    // Cập nhật trạng thái active
+                    caseSelector.querySelector('.active').classList.remove('active');
+                    e.target.classList.add('active');
+                    
+                    // Render lại case mới
+                    currentCaseId = e.target.dataset.case;
+                    renderCase(currentCaseId);
+                }
+            });
+            
+            // --- 3. Chức năng Reset ---
+            resetButton.addEventListener('click', () => {
+                renderCase(currentCaseId);
+            });
+
+            // --- 4. Logic Kéo Thả (Drag & Drop) ---
+            
+            function handleDragStart(e) {
+                draggedCard = this;
+                e.dataTransfer.setData('text/plain', this.dataset.cardId);
+                setTimeout(() => this.classList.add('dragging'), 0);
+            }
+
+            function handleDragEnd() {
+                this.classList.remove('dragging');
+                draggedCard = null;
+            }
+
+            dropZones.forEach(zone => {
+                zone.addEventListener('dragover', handleDragOver);
+                zone.addEventListener('dragleave', handleDragLeave);
+                zone.addEventListener('drop', handleDrop);
+            });
+
+            function handleDragOver(e) {
+                e.preventDefault(); // Cần thiết để cho phép drop
+                this.classList.add('drag-over', `border-[${getZoneColor(this.dataset.zone)}]`);
+            }
+
+            function handleDragLeave() {
+                this.classList.remove('drag-over');
+            }
+
+            function handleDrop(e) {
+                e.preventDefault();
+                this.classList.remove('drag-over');
+
+                if (!draggedCard) return;
+
+                const targetZone = this.dataset.zone;
+                const correctZone = draggedCard.dataset.correctZone;
+
+                if (targetZone === correctZone) {
+                    // --- THẢ ĐÚNG ---
+                    this.appendChild(draggedCard);
+                    draggedCard.setAttribute('draggable', 'false');
+                    draggedCard.classList.add('card-correct');
+                    this.classList.add('border-green-500', 'bg-green-50');
+                    
+                    // Hiển thị modal phản hồi
+                    showFeedback(draggedCard.dataset.cardId);
+                } else {
+                    // --- THẢ SAI ---
+                    draggedCard.classList.add('shake');
+                    setTimeout(() => draggedCard.classList.remove('shake'), 500);
+                }
+            }
+
+            // --- 5. Chức năng Modal Phản Hồi ---
+            
+            function showFeedback(cardId) {
+                const caseData = contentData[currentCaseId];
+                const cardData = caseData.cards.find(c => c.id === cardId);
+                
+                if (!cardData) return;
+
+                document.getElementById('modal-title').textContent = cardData.feedbackTitle;
+                document.getElementById('modal-quote').textContent = cardData.text;
+                document.getElementById('modal-explanation').textContent = cardData.feedback;
+                
+                modal.classList.remove('hidden');
+            }
+
+            function closeFeedback() {
+                modal.classList.add('hidden');
+            }
+            
+            modalClose.addEventListener('click', closeFeedback);
+            modalOverlay.addEventListener('click', closeFeedback);
+
+            // --- 6. Hàm Helper lấy màu (cho đẹp) ---
+            function getZoneColor(zone) {
+                switch(zone) {
+                    case 'mastery': return 'var(--color-1-mastery)';
+                    case 'vicarious': return 'var(--color-2-vicarious)';
+                    case 'verbal': return 'var(--color-3-verbal)';
+                    case 'emotional': return 'var(--color-4-emotional)';
+                    default: return '#ccc';
+                }
+            }
+            
+            // --- Khởi động ứng dụng ---
+            renderCase(currentCaseId);
+        });
+    </script>
+</body>
+</html>
